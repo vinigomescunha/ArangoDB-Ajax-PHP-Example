@@ -1,0 +1,58 @@
+[
+    {
+        "name": "triagens/arangodb",
+        "version": "v2.6.1",
+        "version_normalized": "2.6.1.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/arangodb/arangodb-php.git",
+            "reference": "acaf40170cc89b26b17a1d14034b5daf34e4ba9c"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/arangodb/arangodb-php/zipball/acaf40170cc89b26b17a1d14034b5daf34e4ba9c",
+            "reference": "acaf40170cc89b26b17a1d14034b5daf34e4ba9c",
+            "shasum": ""
+        },
+        "require": {
+            "php": ">=5.3.0"
+        },
+        "time": "2015-07-23 10:08:19",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "triagens\\ArangoDb": "lib/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "Apache2"
+        ],
+        "authors": [
+            {
+                "name": "Jan Steemann",
+                "homepage": "https://github.com/arangodb/arangodb-php",
+                "role": "Developer"
+            },
+            {
+                "name": "Frank Mayer",
+                "homepage": "https://github.com/arangodb/arangodb-php",
+                "role": "Developer"
+            },
+            {
+                "name": "Contributors",
+                "homepage": "https://github.com/arangodb/arangodb-php/graphs/contributors"
+            }
+        ],
+        "description": "ArangoDb PHP client",
+        "homepage": "https://github.com/arangodb/arangodb-php",
+        "keywords": [
+            "Arango",
+            "ArangoDb",
+            "database",
+            "document store",
+            "nosql"
+        ]
+    }
+]

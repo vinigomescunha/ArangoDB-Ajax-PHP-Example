@@ -1,0 +1,12 @@
+{
+    "name": "vinicius/arangoexample",
+    "require": {
+        "triagens/arangodb": "^2.6"
+    },
+    "authors": [
+        {
+            "name": "Vinicius Gomes",
+            "email": "vinigomescunha@gmail.com"
+        }
+    ]
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>ArangoDB Ajax PHP jQuery Example</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1 class="text-center">ArangoDB Ajax PHP Example</h1><button class="btn-create btn btn-primary pull-right"><span class="glyphicon glyphicon-plus"></span></button>
+            </div>
+            <div id="no-more-tables">
+                <table id="theTable" class="col-md-12 table-bordered table-striped table-condensed cf">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th class="control"><i class="cog"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!--modal-->
+    <div id="MyModal" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="form-modal">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title" id="MyModalTitle"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <input class="form-control " name="name" type="text" placeholder="Name...">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control " name="email" type="text" placeholder="Email...">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control " name="address" type="text" placeholder="Address...">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" id="MyModalSubmit" class="btn btn-warning btn"><span class="glyphicon glyphicon-ok-sign"></span></button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!--modal end-->
+</body>
+<link href="assets/css/bootstrap.min.css" rel="stylesheet">
+<script src="assets/js/jquery.min.js"></script>
+<script src="assets/js/bootstrap.min.js"></script>
+<script>
+page = 0;
+var hash = window.location.search.replace("?","").split("&");
+for(var h in hash){
+    hs = hash[h].split("="); 
+    if(hs[0] == 'page') page = parseInt(hs[1]) - 1;
+}
+var pagination = function(total) {
+    var num = Math.ceil(total);
+    $('.pagination').remove();
+    $('#theTable').after('<ul class="pagination"></ul>');
+    for (var i = 0; i < (num); i++) 
+        $('.pagination').append('<li><a class="page-define" data-page=' + i + ' href="#">' + (i + 1) + '</a></li>');
+},
+lsData = function(data) {
+    pagination(data.pages);
+    $('#theTable tbody').html('');
+    if(data.count == 0) return false;
+    $.each(data.result, function(i, v) {
+        var name = (v._values['name']) ? v._values['name'] : '&nbsp;',
+        email = (v._values['email'] ? v._values['email'] : '&nbsp;'),
+        address = (v._values['address'] ? v._values['address'] : '&nbsp;'),
+        button = '<button data-id=' + v._key + ' class="btn-update btn btn-primary btn-xs"><span class="glyphicon glyphicon-pencil"></span></button><button data-id=' + v._key + ' class="btn-delete btn btn-danger btn-xs"><span class="glyphicon glyphicon-trash"></span></button>';
+        $('#theTable tbody').append('<tr id="' + v._key + '"><td>' + name + '</td><td>' + email + '</td><td>' + address + '</td><td class="control">' + button + '</td></tr>');
+    });
+},
+updateForm = function(data) {
+    for (var i in data.result[0]._values) {
+        $('.frm-update').find("input, textarea, select").each(function(_, kv) { 
+		$('.frm-update').find('[name="' + kv.name + '"]').val(data.result[0]._values[kv.name]);  
+	});
+    }
+},
+list = function(params) {ajax("ajax/request.php?action=find&sort=_key&page=" + page, lsData, params);},
+ajax = function(url, callback, params) {
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: params,
+        async: true,
+        dataType: "json",
+        success: function(data, textStatus, jqXHR) {callback(data);},
+        error: function(jqXHR, textStatus, errorThrown) {console.log("Error! Verify the request.");}
+    });
+};
+list();
+
+$(document).on('click', '.btn-update', function() {
+    var id = $(this).attr('data-id');
+    $('#form-modal').removeClass().addClass('frm-update');
+    $('#MyModal').modal({backdrop: false});
+    $('#MyModalTitle').html('Update');
+    $('#MyModalSubmit').html('Update');
+    $('#form-modal').attr('data-id', id);
+    ajax("ajax/request.php?action=find", function(t) {updateForm(t);}, {_key: id});
+});
+
+$(document).on('click', '.btn-create', function() {
+    $('#form-modal')[0].reset()
+    $('#MyModal').modal({backdrop: false});
+    $('#MyModalTitle').html('Create');
+    $('#MyModalSubmit').html('Create');
+    $('#form-modal').removeClass().addClass('frm-create');
+});
+
+$(document).on('click', '.btn-delete', function() {
+   var id = $(this).attr('data-id');
+   $('<div class="deleteMODAL modal fade"><div class="modal-dialog"><div class="modal-content"><div class="modal-body"><h2>Confirma a deleção do registro?</h2></div><div class="modal-footer"><button type="submit" id="deleteMSG" class="btn btn-danger btn"><span class="glyphicon glyphicon-remove-sign"></span> Delete</button><button type="button" class="btn btn-default" data-dismiss="modal">Close</button></div></div></div></div>').modal({backdrop:false})
+.find('#deleteMSG')
+.click(function(e){ajax("ajax/request.php?action=delete&_key=" + id, function(t) { $('.deleteMODAL').modal('hide');list();}, {});});
+});
+
+$(document).on('submit', '.frm-update', function(e) {
+    e.preventDefault();
+    $('#MyModal').modal('hide');
+    var id = $(this).attr('data-id');
+    var params = {};
+    $('.frm-update').find("input, textarea, select").each(function(_, kv) { params[kv.name] = kv.value; });
+    ajax("ajax/request.php?action=update&_key=" + id, list, params);
+});
+
+$(document).on('submit', '.frm-create', function(e) {
+    e.preventDefault();
+    $('#MyModal').modal('hide');
+    var params = {};
+    $('.frm-create').find("input, textarea, select").each(function(_, kv) { params[kv.name] = kv.value; });
+    ajax("ajax/request.php?action=create", list, params);
+});
+
+$(document).on('click', '.page-define', function() {
+    page = $(this).attr('data-page');
+    window.location.hash = "page=" + page;
+    list();
+});
+</script>
+<style>.cog{font-style:normal;font-size:15px;}.cog:after{content:"\2699        Control";}.control{max-width:100px;width:100px;text-align:center;}.btn-xs{margin:2px;}.btn-create{margin:6px}</style>
+    </html>
